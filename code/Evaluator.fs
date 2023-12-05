@@ -1,68 +1,51 @@
 module Evaluator
 
 open AST
+open GameEngine
 
-module gameEngine =
-    type GameState = { characters: Character list;
-                       rooms: Room list;
-                       objects: Object list;
-                       turn: int;
-                       alive: bool; }
-
-    type Commands = 
-    | Attack
-    | Defend
-    | Abilities
-    | Flee
-
-    let init = { characters = [];
-                                  rooms = [];
-                                  objects = [];
-                                  turn = 0;
-                                  alive = true; }
-
-    let addCharacter char = 
-        // printfn "Adding character..."
-        { characters = char::init.characters;
-          rooms = [];
-          objects = [];
+let initGS =
+    fun cE oE mE ->
+        { characters = cE;
+          rooms = mE; 
+          objects = oE; 
           turn = 0;
+          mcL = "";
           alive = true; }
 
-    let prettyprintCharacterInfo (char: Character) = 
-        printf "There is a character named %s " char.name 
-        printf "with stats %A " char.stats
-        printf "and abilities %A " char.abilities 
+let rec evalObjects =
+    fun (ss: Sentence list) (charE: charEnv) (objE: objEnv) (mapE: mapEnv) ->
+        match ss with
+        | [] ->
+            // printfn "Evaluated Objects of Room"
+            initGS charE objE mapE
+        | s::ss ->
+            match s with
+            | Character c->
+                // printfn "Found a character!"
+                let newEnv: Map<string,Character> = charE.Add (c.name, c)
+                evalObjects ss newEnv objE mapE
+            | Object o ->
+                failwith "Found an object!"
+                //let newEnv = objEnv.Add (o.name, o)
+                //evalObjects ss charE objE mapE
 
-    let gameStart mostRecentGameState = 
-        printfn "Welcome to the game you've made! (TODO Allow user to create introduction)"
-        printfn "Here is what is in the game so far: "
-        printfn "%A" (prettyprintCharacterInfo mostRecentGameState.characters.Head)
+let evalMap =
+    fun (mapE: mapEnv) ->
+        // printfn "Evaluating map..."
+        let charEnv = Map.empty
+        let objEnv = Map.empty
+        let values = mapE |> Map.values |> Seq.cast |> List.ofSeq
+        let objects = List.map (fun (r: Room) -> r.objects) values |> List.concat
+        evalObjects objects charEnv objEnv mapE
+        //(initGS, mapE) ||> Map.fold (fun state r -> evalObjects r.objects charEnv objEnv mapE)
+        // mapE |> Map.iter (fun v -> evalObjects v.objects charEnv objEnv mapE)
 
-
-(*
-
-
-*)
-let evalCharacter =
-    fun c ->
-        //printfn "Eval character..."
-        gameEngine.addCharacter c 
-
-let evalSentence =
-    fun s ->
-        match s with
-        | Character {typep = t; name = n; stats = s; abilities = a} -> 
-            let characterE = {typep = t; name = n; stats = s; abilities = a}
-            //printfn "Eval sentence..."
-            evalCharacter characterE
-        | _ -> failwith "TODO"
-        // | Room (n, i, c) -> 
-        // | Object (n, i) ->  
-
-let evalParagraph = 
-    fun p  ->
-        //printfn "Eval paragraph..."
-        let mostRecentGameState = (List.map (fun s -> evalSentence s) p) |> List.last
-        //printfn "Starting game..."
-        gameEngine.gameStart mostRecentGameState
+let rec evalParagraph = 
+    fun rs (mapE: mapEnv)  ->
+        match rs with 
+        | [] -> 
+            // printfn "Par map: %A" mapE 
+            playGame (evalMap mapE)
+        | r::rs -> 
+            let newEnv = mapE.Add (r.name, r)
+            evalParagraph rs newEnv

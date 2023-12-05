@@ -4,21 +4,35 @@ open Combinator
 open AST
 
 let paragraph, paragraphImpl = recparser()
+let psentence, psentenceImpl = recparser()
 
-let punknownstr = pmany1 pletter |>> stringify // pseq (pmany0 pupper) (pmany1 pletter) (fun (us, ls) -> stringify (us @ ls))
+let pad =
+    fun p ->
+        pbetween
+            (pws0)
+            (p)
+            (pws0)
+
+let pstrhelper = pletter <|> pchar ' '
+
+let punknownstr = 
+    pbetween
+        (pchar '\"')
+        (pmany1 (psat (fun c -> c <> '\"')))    
+        (pchar '\"') 
+        |>> stringify // pseq (pmany0 pupper) (pmany1 pletter) (fun (us, ls) -> stringify (us @ ls))
     
 let pnumber = pmany1 pdigit |>> (fun ds -> stringify ds) |>> int
 
 let ptype = 
-    pbetween
-        (pstr "There is a ")
+    pleft
                 (punknownstr <!> "Type String") 
-                (pstr " character ")
+                (pad (pstr "character"))
     |>> (fun t -> Type t) <!> "type"
 
 let pname =
     pright
-        (pstr "named ")
+        (pad (pstr "named"))
             (punknownstr <!> "Name String")
     |>> (fun n -> Name n) <!> "name"
 
@@ -59,7 +73,7 @@ let pspd =
 
 let pstats =
     pright
-        (pstr "stats: ")
+        (pad (pstr "with stats:"))
         (pbind php (fun h ->
             pbind pmp (fun m ->
                 pbind patk (fun a ->
@@ -80,53 +94,102 @@ let pstats =
 
 let peffect =
     pright
-        (pstr " has effect ")
+        (pad (pstr "has effect"))
             (punknownstr <!> "Effect String")
     |>> (fun e -> Effect e) <!> "effect"
     
 let pability: Parser<Ability> =
     pbetween
-            (pstr "ability ")
+            (pad (pstr "ability"))
             (pseq
                 (pname <!> "Ability String")
                 (peffect)
                 (fun a ->  {name = fst a; effect = snd a})  <!> "ability"
             )
-            ((pstr ", ") <|> (pstr ""))
+            ((pstr ",") <|> (pstr ""))
 
 let pabilities: Parser<Abilities> =
     pright
-        (pstr " and abilities: ")
+        (pad (pstr "and abilities:"))
         (pmany0 pability)
-    |>> (fun (ps) -> ps) <!> "abilities"
+    |>> (fun ps -> ps) <!> "abilities"
 
 // Character of Type * Name * Stats * Abilities
 let character = 
-    pbetween
+    pright
         (pws0)
         (pbind ptype (fun t ->
             pbind pname (fun n ->
-                    pright
-                        (pstr " with ")
-                        (pbind pstats (fun s ->
-                            pbind pabilities (fun a ->
-                                presult { typep = t; name = n; stats = s; abilities = a }
+                    (pbind pstats (fun s ->
+                        pbind pabilities (fun a ->
+                            presult { typep = t; name = n; stats = s; abilities = a }
                             )
                         )
                     )
                 )
             )  
         )
-        (pchar '.')
     |>> (fun c -> Character c) <!> "character"
 
-let psentence = character// <|> room <|> object 
+let pdescriptor = 
+    pright
+        (pad (pstr "with description:"))
+        (punknownstr)
+    |>> (fun d -> Descriptor d) <!> "descriptor"
 
-paragraphImpl := pmany1 psentence |>> (fun ss -> ss)
+let pobjects: Parser<Sentence list> =
+    pright
+        (pad (pstr "with objects:"))
+        (pmany0 psentence)  
+    |>> (fun os -> os) <!> "objects"
+
+let pconnection =
+    pseq
+        (pleft 
+            (punknownstr)
+            (pad (pstr "is"))
+        )
+        (pleft 
+            (punknownstr)
+        (pstr "," <|> pstr ".")
+        )
+        (fun c -> Connection c) <!> "connection"
+
+let pconnections: Parser<Connections> =
+    pright
+        (pad (pstr "and connections:"))
+        (pmany0 pconnection)
+    |>> (fun cs -> cs) <!> "connections"
+
+// There is a <room> <name>: with objects: <objects> and connections: <connections>
+let room: Parser<Room> =
+    pbetween
+        (pws0)
+        (pright 
+            (pad (pstr "There is a room"))
+            (pbind pname (fun n ->
+                pbind pdescriptor (fun d->
+                    pbind pobjects (fun os ->
+                        pbind pconnections (fun c ->
+                            presult { name = n; descriptor = d; objects = os; connections = c} 
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        (pstr "")
+    |>> (fun r -> r) <!> "room" // WAS Room r before changing ast
+
+
+psentenceImpl := character //<|> object 
+
+paragraphImpl := pmany1 room |>> (fun (ss) -> ss)
 let grammar = pleft paragraph peof
 
-let parse(input: string) =
-    let i = prepare input
-    match grammar i with
-    | Success(ast, _) -> Some ast
-    | Failure(_, _) -> None
+let parse =
+    fun input ->
+        let i = prepare input
+        match grammar i with
+        | Success(ast, _) -> Some ast
+        | Failure(_, _) -> None

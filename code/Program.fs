@@ -8,16 +8,14 @@ let usage() =
 [<EntryPoint>]
 let main args =
     let file = System.IO.File.ReadAllLines args[0] |> String.concat ""
-    //printfn "File contents: %s" file
     let p = parse file
 
     match p with
     | Some ast -> 
-        //printfn "Successful parse... Starting evaluation..."
-        let i = evalParagraph ast
+        evalParagraph ast Map.empty
         0
     | None -> 
-        printfn("FAILED")
+        printfn("Invalid program.")
         usage()
         1
 
