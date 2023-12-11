@@ -26,49 +26,49 @@ let pnumber = pmany1 pdigit |>> (fun ds -> stringify ds) |>> int
 
 let ptype = 
     pleft
-                (punknownstr <!> "Type String") 
+                (pad (punknownstr)) 
                 (pad (pstr "character"))
     |>> (fun t -> Type t) <!> "type"
 
 let pname =
     pright
         (pad (pstr "named"))
-            (punknownstr <!> "Name String")
+            (pad (punknownstr))
     |>> (fun n -> Name n) <!> "name"
 
 let php =
     pright
-        (pstr "hp = ")
+        (pad (pstr "hp = "))
         pnumber
 
 let pmp =
     pright
-        (pstr ", mp = ")
+        (pad (pstr ", mp = "))
         pnumber
 
 let patk =
     pright
-        (pstr ", atk = ")
+        (pad (pstr ", atk = "))
         pnumber
 
 let pdef =
     pright
-        (pstr ", def = ")
+        (pad (pstr ", def = "))
         pnumber
 
 let pmatk =
     pright
-        (pstr ", matk = ")
+        (pad (pstr ", matk = "))
         pnumber
 
 let pmdef =
     pright
-        (pstr ", mdef = ")
+        (pad (pstr ", mdef = "))
         pnumber
 
 let pspd =
     pright
-        (pstr ", spd = ")
+        (pad (pstr ", spd = "))
         pnumber   
 
 let pstats =
@@ -93,16 +93,17 @@ let pstats =
     |>> (fun s -> s)  <!> "stats"
 
 let peffect =
-    pright
+    pbetween
         (pad (pstr "has effect"))
-            (punknownstr <!> "Effect String")
+            (pad (punknownstr))
+            ((pstr ",") <|> (pstr ""))
     |>> (fun e -> Effect e) <!> "effect"
     
 let pability: Parser<Ability> =
     pbetween
             (pad (pstr "ability"))
             (pseq
-                (pname <!> "Ability String")
+                (pname)
                 (peffect)
                 (fun a ->  {name = fst a; effect = snd a})  <!> "ability"
             )
@@ -134,7 +135,7 @@ let character =
 let pdescriptor = 
     pright
         (pad (pstr "with description:"))
-        (punknownstr)
+        (pad (punknownstr))
     |>> (fun d -> Descriptor d) <!> "descriptor"
 
 let pobjects: Parser<Sentence list> =
@@ -146,11 +147,11 @@ let pobjects: Parser<Sentence list> =
 let pconnection =
     pseq
         (pleft 
-            (punknownstr)
+            (pad (punknownstr))
             (pad (pstr "is"))
         )
         (pleft 
-            (punknownstr)
+            (pad (punknownstr))
         (pstr "," <|> pstr ".")
         )
         (fun c -> Connection c) <!> "connection"
@@ -181,8 +182,40 @@ let room: Parser<Room> =
         (pstr "")
     |>> (fun r -> r) <!> "room" // WAS Room r before changing ast
 
+let pinteraction =
+    pbetween
+            (pad (pstr "interaction"))
+            (pseq
+                (pname)
+                (peffect)
+                (fun a ->  {name = fst a; effect = snd a})  <!> "interaction"
+            )
+            ((pstr ",") <|> (pstr ""))
 
-psentenceImpl := character //<|> object 
+let pinteractions =
+    pright
+        (pad (pstr "and interactions:"))
+        (pmany0 pinteraction)
+    |>> (fun is -> is) <!> "interactions"
+
+let object =
+    pbetween
+        (pws0)
+        (pright
+            (pad (pstr "object"))
+            (pbind pname (fun n ->
+                pbind pdescriptor (fun d ->
+                    pbind pinteractions (fun i ->
+                        presult { name = n; descriptor = d; interactions = i; }
+                        )
+                    )
+                )
+            )
+        )
+        (pstr "")
+    |>> (fun o -> Object o)
+
+psentenceImpl := character <|> object 
 
 paragraphImpl := pmany1 room |>> (fun (ss) -> ss)
 let grammar = pleft paragraph peof

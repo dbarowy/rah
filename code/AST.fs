@@ -16,6 +16,10 @@ type Ability = { name: Name;
                  effect: Effect; }
 type Abilities = Ability list
 
+type Interaction = { name: Name;
+                     effect: Effect; }
+type Interactions = Interaction list
+
 type Connection = string * string
 type Connections = Connection list
 
@@ -28,7 +32,7 @@ and Character = { typep: Type;
                   abilities: Abilities; }
 and Object = { name: Name;
                descriptor: Descriptor;
-               interactions: Effect list; }
+               interactions: Interactions; }
 
 type Room = { name: Name;
              descriptor: Descriptor;

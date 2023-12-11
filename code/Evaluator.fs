@@ -21,13 +21,11 @@ let rec evalObjects =
         | s::ss ->
             match s with
             | Character c->
-                // printfn "Found a character!"
                 let newEnv: Map<string,Character> = charE.Add (c.name, c)
                 evalObjects ss newEnv objE mapE
             | Object o ->
-                failwith "Found an object!"
-                //let newEnv = objEnv.Add (o.name, o)
-                //evalObjects ss charE objE mapE
+                let newEnv = objE.Add (o.name, o)
+                evalObjects ss charE objE mapE
 
 let evalMap =
     fun (mapE: mapEnv) ->

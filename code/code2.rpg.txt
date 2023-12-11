@@ -1,0 +1,7 @@
+There is a room named "Foyer" with description: "A modest foyer with not much to look at. Another person stands in the room."
+with objects:
+"Playable" character named "Sammy" with stats: hp = 10, mp = 10, atk = 10, def = 10, matk = 10, mdef = 10, spd = 10 and abilities: ability named "fight" has effect "TODO", ability named "defend" has effect "TODO", 
+"Nonplayable" character named "Katerina" with stats: hp = 20, mp = 20, atk = 20, def = 20, matk = 20, mdef = 20, spd = 10 and abilities: ability named "persuade" has effect "TODO", ability named "better" has effect "TODO", ability named "WOW" has effect "TODO",
+and connections: "North" is "Living Room". 
+
+There is a room named "Living Room" with description: "The living room is cozy." with objects: "Nonplayable" character named "Owen" with stats: hp = 10, mp = 10, atk = 10, def = 5, matk = 10, mdef = 5, spd = 10 and abilities: ability named "nerd" has effect "speak rapidly", ability named "pretentious" has effect "you wouldn't dare", and connections: "South" is "Foyer".
