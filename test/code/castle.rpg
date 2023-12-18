@@ -1,0 +1,20 @@
+There is a room named "Castle Gate" with description: "The castle has been taken over by a group of marauders! Retake your kingdom at any cost!" 
+with objects: ("Playable" character named "Ser Samantha" with stats: hp = 100, mp = 100, atk = 50, def = 50, matk = 25, mdef = 50, spd = 75 and abilities:) and connections: "North" is "Courtyard".
+
+There is a room named "Courtyard" with description: "The courtyard is littered with the remains of a great battle." with objects: 
+("Nonplayable" character named "Raider Cliff" with stats: hp = 50, mp = 0, atk = 50, def = 25, matk = 0, mdef = 0, spd = 50 and abilities:),
+("Nonplayable" character named "Raider Shaman Lernie" with stats: hp = 25, mp = 100, atk = 0, def = 25, matk = 75, mdef = 50, spd = 40 and abilities:)     
+and connections: "North" is "Throne Room", "East" is "Training Room", "West" is "Library", "South" is "Castle Gate".
+
+There is a room named "Library" with description: "The quiet library's books remain untouched by the attackers." with objects: 
+("Nonplayable" character named "The Librarian" with stats: hp = 50, mp = 150, atk = 25, def = 50, matk = 100, mdef = 100, spd = 10 and abilities:)
+and connections: "East" is "Courtyard".
+
+There is a room named "Training Room" with description: "The training room, usually stockpiled with weapons, has been looted by the raiders."
+with objects: ("Nonplayable" character named "Weapons Master" with stats: hp = 75, mp = 0, atk = 100, def = 75, matk = 0, mdef = 0, spd = 100 and abilities:)
+and connections: "West" is "Courtyard".
+
+There is a room named "Throne Room" with description: "The ornate throne room is marred by the aftermath of the royal guard's last stand." with objects:
+("Nonplayable" character named "Raider Chieftan Karla" with stats: hp = 100, mp = 50, atk = 75, def = 50, matk = 50, mdef = 50, spd = 75 and abilities:), 
+(object named "Royal Scepter" with description: "The symbol of your kingdom's strength and prosperity." and interactions: interaction named "pick up" has effect "game win")
+and connections: "South" is "Courtyard".

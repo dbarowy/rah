@@ -1,0 +1,15 @@
+There is a room named "Principle's Office" with description: "The infamous principle's office lies before you. It is bare of personality and reeks of shattered dreams. Salvation lies behind you." with objects:
+("Nonplayable" character named "The Principle" with stats: hp = 200, mp = 200, atk = 50, def = 25, matk = 0, mdef = 0, spd = 75 and abilities:)
+and connections: "Behind" is "Administration". 
+
+There is a room named "Administration" with description: "A place of polarizing emotion - either the joy of being check out early for dentist's appointments, or the terror of awaiting disciplinary action. To the left is the Principle's office. To the right is the hallway."
+with objects: and connections: "Left" is "Principle's Office", "Right" is "Hallway". 
+
+There is a room named "Hallway" with description: "The hall is filled with lockers. Not a soul lies in sight. To your left is administration, in front of you is the cafeteria, and behind you a classroom." with objects: 
+and connections: "Left" is "Administration", "Forward" is "Cafeteria", "Behind" is "Classroom". 
+
+There is a room named "Cafeteria" with description: "The food isn't that bad once you eat enough meals. The window you always stare out of beckons to you." with objects: (object named "window" with description: "The window you always look at as you eat lunch seems to be slightly ajar." and interactions: interaction named "open window" has effect "game win")
+and connections: "Behind" is "Hallway". 
+
+There is a room named "Classroom" with description: "Your homeroom is empty. An unfinished worksheet with your name lies before you. In front of you is the classroom exit." with objects:
+("Playable" character named "You" with stats: hp = 10, mp = 200, atk = 5, def = 25, matk = 0, mdef = 0, spd = 5 and abilities:) and connections: "Forward" is "Hallway".

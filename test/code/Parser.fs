@@ -20,7 +20,7 @@ let punknownstr =
         (pchar '\"')
         (pmany1 (psat (fun c -> c <> '\"')))    
         (pchar '\"') 
-        |>> stringify 
+        |>> stringify // pseq (pmany0 pupper) (pmany1 pletter) (fun (us, ls) -> stringify (us @ ls))
     
 let pnumber = pmany1 pdigit |>> (fun ds -> stringify ds) |>> int
 
@@ -162,6 +162,7 @@ let pconnections: Parser<Connections> =
         (pmany0 pconnection)
     |>> (fun cs -> cs) <!> "connections"
 
+// There is a <room> <name>: with objects: <objects> and connections: <connections>
 let room: Parser<Room> =
     pbetween
         (pws0)
@@ -179,7 +180,7 @@ let room: Parser<Room> =
             )
         )
         (pstr "")
-    |>> (fun r -> r) <!> "room"
+    |>> (fun r -> r) <!> "room" // WAS Room r before changing ast
 
 let pinteraction =
     pbetween
@@ -227,8 +228,7 @@ let parse =
     fun input ->
         let i = prepare input
         match grammar i with
-        | Success(ast, _) -> 
-            Some ast
+        | Success(ast, _) -> Some ast
         | Failure(p, r) -> 
             printfn "%s" r
             printfn "Error located at pos %d" p

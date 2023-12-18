@@ -149,13 +149,13 @@ let rec playGame =
                 printfn "Error! Playable character not found."
                 exit 1
 
+
         let currentRoom = 
             match findCurrentRoom map mc |> scml with
             | Some m -> snd m
             | None ->
                 printfn "Error! Room not found."
                 exit 1
-
         let connections = currentRoom.connections
         let objects = currentRoom.objects
 
@@ -541,22 +541,3 @@ let rec playGame =
     TODO Fix -1 dmg and -1 healing
     Fix diagnostic outside of combat
 *)
-let expectOut =
-    fun gs ->
-        let map = gs.rooms
-        let characters = gs.characters
-        let mc = 
-            match characters |> Map.filter (fun n c -> c.typep = "Playable") |> scml with
-            | Some m -> snd m
-            | None -> 
-                printfn "Error! Playable character not found."
-                exit 1
-
-        let currentRoom = 
-            match findCurrentRoom map mc |> scml with
-            | Some m -> snd m
-            | None ->
-                printfn "Error! Room not found."
-                exit 1
-
-        printfn "Expected output: %A" currentRoom.descriptor
