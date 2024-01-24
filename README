@@ -1,0 +1,4 @@
+RPGS at Home (RAH) was my final project for CS 334 Programming Languages at Williams College. It is a programming language that allows it's users to write simple text-based RPG games with plain English sentences. 
+Language documentation can be found in the docs folder, and the code itself can be found in the code folder. Example programs are provided in documentation, as well as how to run your own programs in RAH. 
+
+I plan on cleaning up existing code and adding tons of features, such as a leveling system, inventory, item interactability, and much more in the future.
